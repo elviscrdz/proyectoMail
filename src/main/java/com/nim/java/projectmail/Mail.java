@@ -9,6 +9,10 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -20,6 +24,8 @@ public class Mail extends javax.swing.JFrame {
      */
     public Mail() {
         initComponents();
+        cargarBaseDatos();
+        
     }
 
     private void copy(String copiar) {
@@ -525,5 +531,18 @@ public void limpiarCheckbox(){
     checkCPS.setSelected(false);
     checkDES.setSelected(false);
     checkCRB.setSelected(false);
+}
+public void cargarBaseDatos(){
+    try{
+        Connection conexion = DriverManager.getConnection ("jdbc:mysql://localhost/banco1","root", "");
+        Statement sentencia = conexion.createStatement(); 
+        ResultSet registro = sentencia.executeQuery ("select * from principal");
+        while (registro.next()) 
+{ 
+    System.out.println (registro.getInt (1) + " " + registro.getString (2)+ " " + registro.getDate(3)); 
+}
+    }catch(Exception e){
+        e.printStackTrace();
+    }
 }
 }
