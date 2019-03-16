@@ -11,7 +11,10 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,6 +102,7 @@ public class Mail extends javax.swing.JFrame {
         cps = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         crb = new javax.swing.JTextField();
+        botonGuardar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -289,23 +293,33 @@ public class Mail extends javax.swing.JFrame {
             }
         });
 
+        botonGuardar.setText("Guardar");
+        botonGuardar.setName("botonGuardar"); // NOI18N
+        botonGuardar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonGuardarActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel5)
-                    .addComponent(jLabel1)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel4)
-                    .addComponent(jLabel3)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
-                    .addComponent(arb)
-                    .addComponent(cph)
-                    .addComponent(cps)
-                    .addComponent(crb))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(botonGuardar)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel5)
+                        .addComponent(jLabel1)
+                        .addComponent(jLabel2)
+                        .addComponent(jLabel4)
+                        .addComponent(jLabel3)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 435, Short.MAX_VALUE)
+                        .addComponent(arb)
+                        .addComponent(cph)
+                        .addComponent(cps)
+                        .addComponent(crb)))
                 .addContainerGap(52, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -331,7 +345,9 @@ public class Mail extends javax.swing.JFrame {
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(crb, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(79, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
+                .addComponent(botonGuardar)
+                .addGap(24, 24, 24))
         );
 
         jTabbedPane1.addTab("Configuracion", jPanel2);
@@ -420,6 +436,14 @@ public class Mail extends javax.swing.JFrame {
         depurarTexto();
     }//GEN-LAST:event_checkCRBActionPerformed
 
+    private void botonGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonGuardarActionPerformed
+        try {
+            guardarBaseDatos();
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Mail.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_botonGuardarActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -476,6 +500,7 @@ public class Mail extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JTextField arb;
+    private javax.swing.JButton botonGuardar;
     private javax.swing.JCheckBox checkARB;
     private javax.swing.JCheckBox checkCPH;
     private javax.swing.JCheckBox checkCPS;
@@ -533,16 +558,44 @@ public void limpiarCheckbox(){
     checkCRB.setSelected(false);
 }
 public void cargarBaseDatos(){
+    
     try{
-        Connection conexion = DriverManager.getConnection ("jdbc:mysql://localhost/banco1","root", "");
+        Class.forName("com.mysql.jdbc.Driver");
+        Connection conexion = DriverManager.getConnection("jdbc:mysql://localhost:3306/banco1","root","");
         Statement sentencia = conexion.createStatement(); 
         ResultSet registro = sentencia.executeQuery ("select * from principal");
         while (registro.next()) 
-{ 
-    System.out.println (registro.getInt (1) + " " + registro.getString (2)+ " " + registro.getDate(3)); 
+{     
+    arb.setText(registro.getString(1));
+    cph.setText(registro.getString(2));
+    cps.setText(registro.getString(3));
+    des.setText(registro.getString(4));
+    crb.setText(registro.getString(5));
 }
     }catch(Exception e){
         e.printStackTrace();
     }
+}
+public void guardarBaseDatos() throws ClassNotFoundException{
+    try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection conexion=DriverManager.getConnection("jdbc:mysql://localhost:3306/banco1", "root", "");
+            //Statement sentencia=conexion.createStatement();
+            PreparedStatement sentencia=conexion.prepareStatement("UPDATE PRINCIPAL SET ARB =?, CPH=?, CPS=?, DES=?, CRB=? WHERE NUMERO=1");
+            //ResultSetMetaData metaDatos=resultado.getMetaData();
+            //while(resultado.next()){
+                sentencia.setString(1, arb.getText());
+                sentencia.setString(2, cph.getText());
+                sentencia.setString(3, cps.getText());
+                sentencia.setString(4, des.getText());
+                sentencia.setString(5, crb.getText());
+                //persona.nombres=resultado.getString(2);
+            //}
+            sentencia.executeUpdate();
+            sentencia.close();
+            conexion.close();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
 }
 }
